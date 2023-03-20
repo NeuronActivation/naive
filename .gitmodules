@@ -1,0 +1,3 @@
+[submodule "termos"]
+	path = termos
+	url = https://github.com/roopereku/termos.git
