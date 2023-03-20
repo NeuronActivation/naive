@@ -1,69 +1,9 @@
-#include <termos/TabbedView.hh>
+#include "Directory.hh"
+#include "FileProperties.hh"
+
 #include <termos/Termos.hh>
 #include <termos/Debug.hh>
 #include <termos/Menu.hh>
-
-#include <filesystem>
-
-class FileBase
-{
-public:
-	FileBase(const std::filesystem::path& path) : path(path)
-	{
-	}
-
-	std::filesystem::path path;
-};
-
-class File : public Termos::MenuEntry, public FileBase
-{
-public:
-	File(const std::filesystem::path& path) : Termos::MenuEntry(path.filename()), FileBase(path)
-	{
-	}
-
-	void onTrigger() override
-	{
-	}
-
-private:
-	const char* getPrefix() override { return "- "; }
-};
-
-class Directory : public Termos::Submenu, public FileBase
-{
-public:
-	Directory(const std::filesystem::path& path) : Termos::Submenu(path.filename()), FileBase(path)
-	{
-		onExpand = std::bind(&Directory::readFiles, this);
-	}
-
-private:
-	void readFiles()
-	{
-		if(initialized)
-			return;
-
-		for(auto& entry : std::filesystem::directory_iterator(path))
-		{
-			if(entry.is_directory())
-				add <Directory> (entry.path());
-
-			else add <File> (entry.path());
-		}
-
-		initialized = true;
-	}
-
-	bool initialized = false;
-};
-
-class FileProperties : public Termos::Widget
-{
-public:
-
-private:
-};
 
 int main()
 {
