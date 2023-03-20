@@ -35,6 +35,15 @@ class Directory : public Termos::Submenu, public FileBase
 public:
 	Directory(const std::filesystem::path& path) : Termos::Submenu(path.filename()), FileBase(path)
 	{
+		onExpand = std::bind(&Directory::readFiles, this);
+	}
+
+private:
+	void readFiles()
+	{
+		if(initialized)
+			return;
+
 		for(auto& entry : std::filesystem::directory_iterator(path))
 		{
 			if(entry.is_directory())
@@ -42,7 +51,11 @@ public:
 
 			else add <File> (entry.path());
 		}
+
+		initialized = true;
 	}
+
+	bool initialized = false;
 };
 
 class FileProperties : public Termos::Widget
