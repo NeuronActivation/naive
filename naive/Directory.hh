@@ -20,6 +20,9 @@ public:
 private:
 	void readFiles();
 
+	void addEntry(const std::filesystem::directory_entry& path);
+	Termos::MenuEntry* findEntry(const char* name);
+
 	std::function <void(Directory&)>& inotifyRegister;
 	bool initialized = false;
 };

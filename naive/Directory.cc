@@ -11,7 +11,37 @@ Directory::Directory(const std::filesystem::path& path,
 
 void Directory::handleEvent(inotify_event* event)
 {
-	DBG_LOG("Event for", path());
+	DBG_LOG("event for", event->name, "in", path());
+
+	if(event->mask & IN_CREATE)
+		addEntry(std::filesystem::directory_entry(event->name));
+
+	if(event->mask & IN_DELETE)
+	{
+		MenuEntry* entry = findEntry(event->name);
+		entry->setHighlight(Termos::Color::Red);
+	}
+}
+
+Termos::MenuEntry* Directory::findEntry(const char* name)
+{
+	for(size_t i = 0; i < entryCount(); i++)
+	{
+		FileBase& file = dynamic_cast <FileBase&> ((*this)[i]);
+
+		if(file.path().filename() == name)
+			return &((*this)[i]);
+	}
+
+	return nullptr;
+}
+
+void Directory::addEntry(const std::filesystem::directory_entry& entry)
+{
+	if(entry.is_directory())
+		add <Directory> (entry.path(), inotifyRegister);
+
+	else add <File> (entry.path());
 }
 
 void Directory::readFiles()
@@ -20,12 +50,7 @@ void Directory::readFiles()
 		return;
 
 	for(auto& entry : std::filesystem::directory_iterator(path()))
-	{
-		if(entry.is_directory())
-			add <Directory> (entry.path(), inotifyRegister);
-
-		else add <File> (entry.path());
-	}
+		addEntry(entry);
 
 	inotifyRegister(*this);
 	initialized = true;
