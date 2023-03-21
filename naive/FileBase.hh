@@ -3,14 +3,13 @@
 
 #include <filesystem>
 
-class FileBase
+class FileBase : public std::filesystem::directory_entry
 {
 public:
-	FileBase(const std::filesystem::path& path) : path(path)
+	FileBase(const std::filesystem::path& path)
+		: std::filesystem::directory_entry(path)
 	{
 	}
-
-	std::filesystem::path path;
 };
 
 #endif
